@@ -1,6 +1,16 @@
 Integrations
-integrating ,
-Project Name is a modern backend service built with Python, FastAPI, SQLAlchemy, and Celery. It provides APIs for managing [your project's purpose].
+This service integrates Instagram, WhatsApp, and Telegram into your application. It simplifies the configuration process by automating repetitive tasks and provides a seamless way to interact with users through these platforms.
+
+Project Integrations is backend service built with Python, FastAPI, PostgreSQL, SQLAlchemy, Redis and Celery.
+
+
+Before Getting Started
+1.Create an App Manually
+
+First, you'll need to manually create an app on the platform (e.g., Facebook Developer Console) https://developers.facebook.com/apps/.
+Enable the Webhook Product and Instagram API Product within the app.
+This is a one-time manual step, so it's not automated.
+
 
 Getting Started
 You can run this project using Docker for convenience or set it up manually by installing dependencies.
@@ -12,6 +22,17 @@ bash
 Copy code
 git clone https://github.com/your-username/your-repo.git
 cd your-repo
+
+Create .env file
+env
+Copy code
+# Database configuration
+DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/db_name
+SYNC_DATABASE_URL=postgresql://username:password@localhost:5432/db_name
+
+# Redis configuration
+REDIS_URL=redis://localhost:6379/0
+
 Ensure Docker and Docker Compose are installed on your system.
 
 Run the application using Docker Compose:
@@ -40,20 +61,6 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 2. Configure the Environment
 Create a .env file in the root directory with the following variables:
-
-env
-Copy code
-# Database configuration
-DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/db_name
-SYNC_DATABASE_URL=postgresql://username:password@localhost:5432/db_name
-
-# Redis configuration
-REDIS_URL=redis://localhost:6379/0
-
-# Other configurations
-JWT_SECRET=your_jwt_secret
-JWT_ALGORITHM=HS256
-Note: Replace username, password, db_name, and other placeholders with your actual configuration.
 
 3. Run Database Migrations
 Initialize the database schema using Alembic:
