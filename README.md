@@ -4,34 +4,28 @@ This service integrates Instagram, WhatsApp, and Telegram into your application.
 Project Integrations is backend service built with Python, FastAPI, PostgreSQL, SQLAlchemy, Redis and Celery.
 
 
-Before Getting Started
-1.Create an App Manually
+## Before Getting Started
+# 1.Create an App Manually
 
 First, you'll need to manually create an app on the platform (e.g., Facebook Developer Console) https://developers.facebook.com/apps/.
 Enable the Webhook Product and Instagram API Product within the app.
 This is a one-time manual step, so it's not automated.
 
 
-Getting Started
+# Getting Started
 You can run this project using Docker for convenience or set it up manually by installing dependencies.
 
-Running with Docker
-Clone the repository:
 
-bash
-Copy code
-git clone https://github.com/your-username/your-repo.git
-cd your-repo
+# Create .env file
 
-Create .env file
-env
-Copy code
-# Database configuration
-DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/db_name
+ASYNC_DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/db_name
 SYNC_DATABASE_URL=postgresql://username:password@localhost:5432/db_name
 
-# Redis configuration
 REDIS_URL=redis://localhost:6379/0
+
+
+# Running with Docker
+Clone the repository:
 
 Ensure Docker and Docker Compose are installed on your system.
 
