@@ -6,10 +6,12 @@ class App(Base):
     __tablename__ = "app"
 
     id = Column(Integer, primary_key=True, default=1, unique=True)  # Single row
-    inst_app_id = Column(String(255), unique=True, nullable=False)
+    inst_app_id = Column(String(255))
     inst_app_secret = Column(String(255))
     webhook_callback_url = Column(String(255))
     webhook_verify_token = Column(String(255))
+    handle_code_url = Column(String(255))
+    embed_url = Column(String(1000))
 
 
 class InstagramAccount(Base):

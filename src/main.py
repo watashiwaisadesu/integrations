@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from src.instagram_api.routes import instagram_api_router
-from src.webhook_config.routes import webhook_setup_router
+from src.automation.routes import webhook_settings_router
 from src.core.middleware import register_middleware
 # from src.utils.error_handler import register_all_errors
 
@@ -32,4 +32,4 @@ register_middleware(app)
 # register_all_errors(app)
 
 app.include_router(instagram_api_router, prefix=f"{version_prefix}/instagram", tags=["InstagramAPI"])
-app.include_router(webhook_setup_router, prefix=f"{version_prefix}/webhook", tags=["WebhookSetup"])
+app.include_router(webhook_settings_router, prefix=f"{version_prefix}/webhook", tags=["WebhookSetup"])

@@ -1,9 +1,9 @@
 from celery import Celery
-
+from src.core.config import REDIS
 celery = Celery(
     "integrations_setup",
-    broker="redis://localhost:6379/0",
-    backend="redis://localhost:6379/0",
+    broker=REDIS,
+    backend=REDIS,
 )
 
 celery.autodiscover_tasks(["src.tasks.webhook_setup_task"])

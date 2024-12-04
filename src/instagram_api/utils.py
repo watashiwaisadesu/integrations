@@ -4,7 +4,7 @@ def extract_code_from_url(url):
     parsed_url = urlparse(url)
     # redirect_uri = str(request.base_url) + "v1/instagram/handle_code"
     # Construct the base URL
-    redirect_uri = f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}/"
+    redirect_uri = f"https://{parsed_url.netloc}{parsed_url.path}"
     print(f"REDIRECT_URL: {redirect_uri}")
     query_params = parse_qs(parsed_url.query)
 

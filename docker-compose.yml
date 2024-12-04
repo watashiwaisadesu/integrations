@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.setup
+    container_name: alembic_migration
+    command: alembic upgrade head
+    volumes:
+      - ./:/usr/src/app
+    networks:
+      - app_network
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      - migrate
+    networks:
+      - app_network
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: celery_worker
+    command: celery -A src.core.celery_setup worker --loglevel=INFO
+    volumes:
+      - ./:/usr/src/app
+    restart: always
+    depends_on:
+      - migrate
+      - web
+      - redis
+    networks:
+      - app_network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/usr/src/app
+    restart: always
+    depends_on:
+      - migrate
+      - redis
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge

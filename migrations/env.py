@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 from src.core.database_setup import Base
-from src.db.models.cookie_model import Cookies
 from src.db.models.instagram_models import InstagramAccount, App
 from src.core.config import ASYNC_DATABASE_URL
 

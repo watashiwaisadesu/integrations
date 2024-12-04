@@ -1,44 +1,46 @@
-from celery import Celery
+import time
 from pydantic import EmailStr
 
-from src.webhook_config.cookies_utils import load_cookies_from_db, save_cookies_to_db
-from src.db.repositories.app_repositories import set_webhook_details
-from src.webhook_config.auth import perform_login
-from src.webhook_config.navigation import navigate_to_my_apps, locate_neuro_employees
-from src.webhook_config.webhook_manager import configure_webhook_product, configure_webhook_for_instagram_api_product
-from src.webhook_config.webdriver_utils import initialize_webdriver
+from src.db.repositories.app_repositories import set_app_details
+from src.automation.auth import perform_login
+from src.automation.navigation import (
+    navigate_to_login_page,
+    navigate_to_my_apps,
+    locate_app_href,
+    navigate_to_webhook_service,
+    navigate_to_instagramapi_service
+)
+from src.automation.webhook_manager import configure_webhook_product, configure_instagram_api_product
+from src.automation.driver_setup import initialize_webdriver
 from src.core.config import SYNC_DATABASE_URL
 from src.core.celery_setup import celery
 from src.core.database_setup import get_sync_db
 
 
 @celery.task
-def webhook_setup_task(email: EmailStr, password: str, verify_token: str, callback_url: str, app_name: str):
-    driver = initialize_webdriver()
+def webhook_setup_task(email: EmailStr, password: str, verify_token: str, base_url: str, app_name: str):
     session = get_sync_db()
+    webhook_callback_url = base_url + "/v1/instagram/webhook"
+    handle_code_url = base_url + "/v1/instagram/handle_code"
+    time.sleep(1)
+    driver = initialize_webdriver()
     try:
-        # Handle cookies
-        if load_cookies_from_db(session, email, driver):
-            print("Cookies loaded successfully from the database.")
-            driver.refresh()
-        else:
-            print("Cookies not found in the database, performing login.")
-            perform_login(driver, email, password)
-            save_cookies_to_db(session, email, driver)
-            print("Cookies saved to the database successfully.")
-
-        driver.get('https://developers.facebook.com/')
-        set_webhook_details(session, verify_token, callback_url)
+        navigate_to_login_page(driver)
+        perform_login(driver, email, password)
         navigate_to_my_apps(driver)
-        neuro_employees_href = locate_neuro_employees(driver, app_name)
 
-        # Perform webhook updates
-        configure_webhook_product(driver, neuro_employees_href, verify_token, callback_url)
+        app_href = locate_app_href(driver, app_name)
 
-        # Additional interactions
-        configure_webhook_for_instagram_api_product(driver, neuro_employees_href, verify_token, callback_url)
+        navigate_to_webhook_service(driver, app_href)
+        configure_webhook_product(driver, verify_token, webhook_callback_url)
+
+        navigate_to_instagramapi_service(driver, app_href)
+        inst_app_id, inst_app_secret, embed_url = configure_instagram_api_product(driver, verify_token, webhook_callback_url, handle_code_url, session)
+        set_app_details(db=session, app_id=inst_app_id, app_secret=inst_app_secret, handle_code_url=handle_code_url,
+                      embed_url=embed_url,  webhook_verify_token=verify_token, webhook_callback_url=webhook_callback_url)
         print("Webhook setup completed successfully.")
     except Exception as e:
         print(f"An error occurred: {e}")
+        driver.quit()
     finally:
         driver.quit()

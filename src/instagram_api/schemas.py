@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 # Data Models
 class MessagingObject(BaseModel):
@@ -17,3 +18,4 @@ class EntryObject(BaseModel):
 class WebhookObject(BaseModel):
     object: str
     entry: list[EntryObject]
+
