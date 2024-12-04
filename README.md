@@ -39,8 +39,6 @@ Start the backend application.
 Set up the database and other dependencies (e.g., Redis).
 Access the application:
 
-API Docs: http://localhost:8000/v1/docs
-Redoc: http://localhost:8000/v1/redoc
 
 # Manual Setup
 If you prefer to set up the application without Docker, follow these steps:
