@@ -4,9 +4,12 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 
 
+
+
 def navigate_to_login_page(driver):
     driver.get('https://www.facebook.com/login/')
     print(f"Navigated to login page (FACEBOOK)")
+    time.sleep(2)
 
 
 def navigate_to_my_apps(driver):

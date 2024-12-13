@@ -14,6 +14,7 @@ def perform_login(driver, email, password):
 
     # Click the login button
     login_button = driver.find_element(By.XPATH, '//*[@id="loginbutton"]')
+    print("located")
     login_button.click()
 
     # Wait and refresh to ensure login is complete

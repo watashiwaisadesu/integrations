@@ -1,7 +1,7 @@
 import time
 from pydantic import EmailStr
 
-from src.db.repositories.app_repositories import set_app_details
+from src.db.repositories.instagram_app_repositories import set_app_details
 from src.automation.auth import perform_login
 from src.automation.navigation import (
     navigate_to_login_page,
@@ -12,7 +12,6 @@ from src.automation.navigation import (
 )
 from src.automation.webhook_manager import configure_webhook_product, configure_instagram_api_product
 from src.automation.driver_setup import initialize_webdriver
-from src.core.config import SYNC_DATABASE_URL
 from src.core.celery_setup import celery
 from src.core.database_setup import get_sync_db
 
@@ -20,8 +19,8 @@ from src.core.database_setup import get_sync_db
 @celery.task
 def webhook_setup_task(email: EmailStr, password: str, verify_token: str, base_url: str, app_name: str):
     session = get_sync_db()
-    webhook_callback_url = base_url + "/v1/instagram/webhook"
-    handle_code_url = base_url + "/v1/instagram/handle_code"
+    webhook_callback_url = base_url + "v1/instagram/webhook"
+    handle_code_url = base_url + "v1/instagram/handle_code"
     time.sleep(1)
     driver = initialize_webdriver()
     try:

@@ -1,16 +1,13 @@
 from fastapi import APIRouter, Request, HTTPException, Query, Depends
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-import httpx
 import logging
 
 from src.core.database_setup import get_async_db
-from src.db.repositories.app_repositories import (
-    set_instagram_credentials,
-    get_webhook_details,
+from src.db.repositories.instagram_app_repositories import (
     get_instagram_credentials
 )
-from src.db.repositories.instagram_account_repositories import (
+from src.db.repositories.instagram_user_repositories import (
     create_instagram_account,
     get_instagram_account
 )
@@ -18,7 +15,7 @@ from src.instagram_api.utils import extract_code_from_url
 from src.instagram_api.schemas import WebhookObject
 from src.instagram_api.token import InstagramAuth
 from src.instagram_api.user import get_instagram_user_info
-
+from src.instagram_api.service import enqueue_message, forward_message_to_service
 
 logging.basicConfig(level=logging.INFO)
 
@@ -37,7 +34,6 @@ async def handle_code(
         request: Request,
         db: AsyncSession = Depends(get_async_db)
 ):
-
     instagram_app_id, instagram_app_secret = await get_instagram_credentials(db, return_type="credentials")
     redirect_uri, code = extract_code_from_url(str(request.url))
     # Initialize the InstagramAuth class
@@ -64,8 +60,8 @@ async def verify_token(
     db: AsyncSession = Depends(get_async_db)
 ):
     logging.info(f"Verification request received: mode={hub_mode}, token={hub_verify_token}, challenge={hub_challenge}")
-    verify_token_str, callback_url = await get_webhook_details(db)
-    if hub_mode == "subscribe" and hub_verify_token == verify_token_str:
+    verify_token, callback_url = await get_instagram_credentials(db, return_type="webhook_details")
+    if hub_mode == "subscribe" and hub_verify_token == verify_token:
         return hub_challenge  # Return challenge as plain text
     raise HTTPException(status_code=403, detail="Verification token mismatch")
 
@@ -85,104 +81,32 @@ async def handle_webhook(
         logging.error(f"Error parsing webhook data: {e}")
         raise HTTPException(status_code=400, detail="Invalid webhook payload")
 
-    if webhook_event.object == "instagram":
-        for entry in webhook_event.entry:
-            page_id = entry.id  # Extract the page_id dynamically
-            page = await get_instagram_account(db, page_id)
-            if page is None:
+    if webhook_event.object != "instagram":
+        return
+    for entry in webhook_event.entry:
+        page_id = entry.id  # Extract the page_id dynamically
+        page = await get_instagram_account(db, page_id)
+        if page is None:
+            continue
+        page_access_token = page.access_token
+        for messaging_event in entry.messaging:
+            # Skip messages that are echoes
+            if messaging_event.message.get("is_echo"):
+                logging.info(f"Skipping echo message: {messaging_event.message}")
                 continue
-            page_access_token = page.access_token
-            for messaging_event in entry.messaging:
-                # Skip messages that are echoes
-                if messaging_event.message.get("is_echo"):
-                    logging.info(f"Skipping echo message: {messaging_event.message}")
-                    continue
 
-                sender_id = messaging_event.sender.get("id")
-                message_text = messaging_event.message.get("text")
+            sender_id = messaging_event.sender.get("id")
+            message_text = messaging_event.message.get("text")
 
-                if message_text:
-                    logging.info(f"Forwarding message to external service: {message_text} from {sender_id}")
-                    await forward_message_to_service(
-                        external_service_url="https://17f08005521d190ebd92a7086c9bba02.serveo.net/process",
-                        page_access_token=page_access_token,
-                        page_id=page_id,
-                        sender_id=sender_id,
-                        message_text=message_text,
-                    )
-                    # response_message = f"Your message: {message_text}"
-                    # await send_message(page_access_token, page_id, sender_id, response_message)
-
+            if message_text:
+                logging.info(f"Forwarding message to external service: {message_text} from {sender_id}")
+                # await enqueue_message(sender_id, page_id, page_access_token, message_text)
+                await forward_message_to_service(
+                    external_service_url="https://b87976f0f549bf7aeac4404d90db6ef0.serveo.net/process",
+                    page_access_token=page_access_token,
+                    page_id=page_id,
+                    sender_id=sender_id,
+                    message_text=message_text,
+                )
     return {"status": "success"}
-
-
-async def forward_message_to_service(
-    external_service_url: str,
-    page_access_token: str,
-    page_id: str,
-    sender_id: str,
-    message_text: str,
-):
-    """
-    Sends the received message to an external service and awaits its response.
-    """
-    payload = {
-        "page_id": page_id,
-        "sender_id": sender_id,
-        "message_text": message_text,
-    }
-
-    headers = {"Content-Type": "application/json"}
-
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.post(external_service_url, json=payload, headers=headers)
-            response.raise_for_status()
-            result = response.json()
-            logging.info(f"Received response from external service: {result}")
-
-            # Send the external service's response back to the user
-            await send_message(
-                page_token=page_access_token,
-                page_id=page_id,
-                recipient_id=sender_id,
-                message_text=result.get("reply", "No reply provided"),
-            )
-        except httpx.RequestError as e:
-            logging.error(f"Request error while sending to external service: {e}")
-        except httpx.HTTPStatusError as e:
-            logging.error(f"HTTP error from external service: {e.response.json()}")
-        except Exception as e:
-            logging.error(f"Unexpected error: {e}")
-
-
-async def send_message(page_token: str, page_id: str, recipient_id: str, message_text: str):
-    """
-    Sends a message to the customer via Instagram Graph API.
-    """
-    url = f"https://graph.instagram.com/v21.0/{page_id}/messages"
-
-    # Create payload
-    payload = {
-        "recipient": {"id": recipient_id},
-        "message": {"text": message_text},
-    }
-
-    # Add access token in headers
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {page_token}",
-    }
-
-    # Make POST request to Instagram Graph API
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.post(url, json=payload, headers=headers)
-            response.raise_for_status()
-            logging.info(f"Message sent successfully to {recipient_id}: {response.json()}")
-            return response.json()
-        except httpx.RequestError as e:
-            logging.error(f"Request error while sending message: {e}")
-        except httpx.HTTPStatusError as e:
-            logging.error(f"HTTP error while sending message: {e.response.json()}")
 

@@ -14,7 +14,7 @@ def get_instagram_user_info(access_token):
     # Check if the request was successful
     if response.status_code == 200:
         user_info = response.json()
-        print(f"USERRRR:{user_info}")
+        print(f"User info:{user_info}")
         return user_info
     else:
         raise Exception(f"Failed to get user info. Status code: {response.status_code}, Response: {response.text}")

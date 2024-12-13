@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
-from src.db.models.instagram_models import App
+from src.db.models.instagram_models import InstagramApp
 
 class InstagramCredentials:
     def __init__(self, app):
@@ -16,6 +16,11 @@ class InstagramCredentials:
     def credentials(self):
         """Return only app_id and app_secret."""
         return self.inst_app_id, self.inst_app_secret
+
+    @property
+    def webhook_details(self):
+        """Return only app_id and app_secret."""
+        return self.webhook_verify_token, self.webhook_callback_url
 
     def all_details(self):
         """Return all available details."""
@@ -37,7 +42,7 @@ async def get_instagram_credentials(db: AsyncSession, return_type="all"):
     :param return_type: "all" for all details, "credentials" for app_id and app_secret only
     :return: InstagramCredentials instance or subset of details
     """
-    app = await db.get(App, 1)  # Fetch the single row with ID = 1
+    app = await db.get(InstagramApp, 1)  # Fetch the single row with ID = 1
     if app is None:
         return None
 
@@ -45,15 +50,17 @@ async def get_instagram_credentials(db: AsyncSession, return_type="all"):
 
     if return_type == "credentials":
         return credentials.credentials
+    elif return_type == "webhook_details":
+        return credentials.webhook_details
     elif return_type == "all":
         return credentials.all_details()
     else:
         raise ValueError(f"Unknown return_type: {return_type}")
 
 async def set_instagram_credentials(db: AsyncSession, app_id: str, app_secret: str):
-    app = await db.get(App, 1)
+    app = await db.get(InstagramApp, 1)
     if app is None:
-        app = App(inst_app_id=app_id, inst_app_secret=app_secret)
+        app = InstagramApp(inst_app_id=app_id, inst_app_secret=app_secret)
         db.add(app)
     else:
         app.inst_app_id = app_id
@@ -61,17 +68,10 @@ async def set_instagram_credentials(db: AsyncSession, app_id: str, app_secret: s
     await db.commit()
 
 
-async def get_webhook_details(db: AsyncSession):
-    app = await db.get(App, 1)  # Fetch the single row with ID = 1
-    if app is None:
-        return None, None
-    return app.webhook_verify_token, app.webhook_callback_url
-
-
 def set_app_details(db: Session, app_id: str, app_secret: str, embed_url: str, handle_code_url: str, webhook_verify_token: str, webhook_callback_url: str):
-    app = db.get(App, 1)
+    app = db.get(InstagramApp, 1)
     if app is None:
-        app = App(
+        app = InstagramApp(
             inst_app_id=app_id,
             inst_app_secret=app_secret,
             embed_url=embed_url,
