@@ -9,9 +9,15 @@ Project Integrations is backend service built with Python, FastAPI, PostgreSQL, 
 # 1.Create an App Manually
 
 First, you'll need to manually create an app on the platform (e.g., Facebook Developer Console) https://developers.facebook.com/apps/.
+![createapp](https://github.com/user-attachments/assets/5935d6d6-b80f-486f-acd7-2dfc223dc051)
+![Screenshot from 2024-12-13 20-06-23]![Uploading 2.png…]()
+(https://github.com/user-attachments/assets/73b9c6d3-9841-44fa-809c-1b8e95d5c33e)
+
 Enable the Webhook Product and Instagram API Product within the app.
 This is a one-time manual step, so it's not automated.
-![image](https://github.com/user-attachments/assets/e2a61e67-2da3-4d1d-b0c5-024b8e256625)
+
+
+
 
 
 
