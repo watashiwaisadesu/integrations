@@ -18,11 +18,38 @@ First, you'll need to manually create an app on the platform (e.g., Facebook Dev
 ![image](https://github.com/user-attachments/assets/5020ce4c-472c-4649-b58b-094ea24ab6e5)
 ======
 Enable the Webhook Product and Instagram API Product within the app.
+======
+![image](https://github.com/user-attachments/assets/788dc969-e631-4238-9927-dad5ca4d583b)
+======
+![image](https://github.com/user-attachments/assets/cd511ce3-a59f-4eef-a045-4ad605896e2b)
+======
+Then you'll see in the left side bar App-Settings section, select and open it.
+Then fillout form and make sure to turn on Live Mode.
+![image](https://github.com/user-attachments/assets/432f575e-5204-4a60-b679-f8ad8725f284)
+=====
+For now skip part where you have to pass verification process for your app to become publicly available!
+Here add Instagram tester account by username!
+![image](https://github.com/user-attachments/assets/ac9a0462-86a0-4804-a5dc-ac86b7f0b3fb)
+=====
+Then go to your instagram page and give permission in test invites tab!
+![image](https://github.com/user-attachments/assets/c8620e15-4300-44ea-ac4d-5f82fdd99086)
+=====
+
+Then here youll get ask for permission
+![image](https://github.com/user-attachments/assets/f984ef9d-e901-4f52-9906-6ba4f25eb26e)
+=====
+
+
+Then you'll see Webhook and Instagram Api products
+![image](https://github.com/user-attachments/assets/014ea4d7-72a8-47a7-876c-9b5b3a794ba1)
+======
+
+
+
+
+
+
 This is a one-time manual step, so it's not automated.
-
-
-
-
 
 
 # Getting Started
