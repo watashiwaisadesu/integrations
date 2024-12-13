@@ -1,4 +1,5 @@
 Integrations
+
 This service integrates Instagram, WhatsApp, and Telegram into your application. It simplifies the configuration process by automating repetitive tasks and provides a seamless way to interact with users through these platforms.
 
 Project Integrations is backend service built with Python, FastAPI, PostgreSQL, SQLAlchemy, Redis and Celery.
@@ -10,6 +11,8 @@ Project Integrations is backend service built with Python, FastAPI, PostgreSQL, 
 First, you'll need to manually create an app on the platform (e.g., Facebook Developer Console) https://developers.facebook.com/apps/.
 Enable the Webhook Product and Instagram API Product within the app.
 This is a one-time manual step, so it's not automated.
+![image](https://github.com/user-attachments/assets/e2a61e67-2da3-4d1d-b0c5-024b8e256625)
+
 
 
 # Getting Started
