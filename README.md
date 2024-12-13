@@ -31,21 +31,10 @@ For now skip part where you have to pass verification process for your app to be
 Here add Instagram tester account by username!
 ![image](https://github.com/user-attachments/assets/ac9a0462-86a0-4804-a5dc-ac86b7f0b3fb)
 =====
-Then go to your instagram page and give permission in test invites tab!
-![image](https://github.com/user-attachments/assets/c8620e15-4300-44ea-ac4d-5f82fdd99086)
-=====
 
 Then here youll get ask for permission
 ![image](https://github.com/user-attachments/assets/f984ef9d-e901-4f52-9906-6ba4f25eb26e)
 =====
-
-
-Then you'll see Webhook and Instagram Api products
-![image](https://github.com/user-attachments/assets/014ea4d7-72a8-47a7-876c-9b5b3a794ba1)
-======
-
-
-
 
 
 
