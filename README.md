@@ -65,9 +65,18 @@ This is a one-time manual step, so it's not automated.  😄
 
 # Getting Started
 
+## - Clone the repository:
+
+To get started, clone the repository from GitHub:
+
+```bash
+git clone https://github.com/watashiwaisadesu/integrations.git
+cd your-repository
+```
+
 ## Using DOCKER
 
-### Create `.env` file
+### 1. Create `.env` file
 
 Create a `.env` file in the root directory of your project with the following content:
 
@@ -79,16 +88,7 @@ REDIS_URL=redis://redis:6379/0
 
 This file is necessary for the application to run correctly.
 
-## Clone the repository:
-
-To get started, clone the repository from GitHub:
-
-```bash
-git clone https://github.com/watashiwaisadesu/integrations.git
-cd your-repository
-```
-
-### Running with Docker
+### 2. Running with Docker
 
 Ensure **Docker** and **Docker Compose** are installed on your system.
 
@@ -98,12 +98,12 @@ Run the application using Docker Compose:
 docker-compose up --build
 ```
 
-### What This Command Does:
+### 3. What This Command Does:
 - Build the Docker images.
 - Start the backend application.
 - Set up the database and other dependencies (e.g., Redis).
   
-### Access the application:
+### 4. Access the application:
 
 Once the application is running, you can access it in your browser at:
 
