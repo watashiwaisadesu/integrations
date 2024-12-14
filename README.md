@@ -13,10 +13,11 @@ First, you'll need to manually create an app on the platform (e.g., Facebook Dev
   <img src="https://github.com/user-attachments/assets/5935d6d6-b80f-486f-acd7-2dfc223dc051" alt="createapp" width="300">
   <img src="https://github.com/user-attachments/assets/f5b271a2-ad1d-486f-9c13-1552b913c946" alt="Screenshot" width="500">
 </div>
-![2](https://github.com/user-attachments/assets/74d7f319-1b58-46c6-acbf-36121556e791)
-======
-![image](https://github.com/user-attachments/assets/5020ce4c-472c-4649-b58b-094ea24ab6e5)
-======
+<div style="display: flex; gap: 10px;">
+  <img src="https://github.com/user-attachments/assets/74d7f319-1b58-46c6-acbf-36121556e791" alt="createapp" width="300">
+  <img src="https://github.com/user-attachments/assets/5020ce4c-472c-4649-b58b-094ea24ab6e5" alt="Screenshot" width="300">
+</div>
+
 Enable the Webhook Product and Instagram API Product within the app.
 ======
 ![image](https://github.com/user-attachments/assets/788dc969-e631-4238-9927-dad5ca4d583b)
