@@ -65,7 +65,7 @@ This is a one-time manual step, so it's not automated.  😄
 
 # Getting Started
 
-## - Clone the repository:
+## Clone the repository:
 
 To get started, clone the repository from GitHub:
 
