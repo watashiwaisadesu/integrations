@@ -52,9 +52,13 @@ Then run script and make request to this endpoint
 This is a one-time manual step, so it's not automated.  😄
 
 
+
+
 # Getting Started
 
-### Create .env file
+### Create `.env` file
+
+Create a `.env` file in the root directory of your project with the following content:
 
 ```env
 ASYNC_DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/db_name
@@ -62,24 +66,37 @@ SYNC_DATABASE_URL=postgresql://username:password@localhost:5432/db_name
 REDIS_URL=redis://redis:6379/0
 ```
 
-You can run this project using Docker for convenience or set it up manually by installing dependencies.
+This file is necessary for the application to run correctly.
+
+## Clone the repository:
+
+To get started, clone the repository from GitHub:
+
+```bash
+git clone https://github.com/watashiwaisadesu/integrations.git
+cd your-repository
+```
 
 ## Running with Docker
-Clone the repository:
 
-
-Ensure Docker and Docker Compose are installed on your system.
+Ensure **Docker** and **Docker Compose** are installed on your system.
 
 Run the application using Docker Compose:
 
+```bash
 docker-compose up --build
+```
 
-This command will:
-Build the Docker images.
-Start the backend application.
-Set up the database and other dependencies (e.g., Redis).
-Access the application:
+## What This Command Does:
+- Build the Docker images.
+- Start the backend application.
+- Set up the database and other dependencies (e.g., Redis).
+  
+## Access the application:
 
+Once the application is running, you can access it in your browser at:
+
+http://localhost:8000/v1/docs
 
 # Manual Setup
 If you prefer to set up the application without Docker, follow these steps:
