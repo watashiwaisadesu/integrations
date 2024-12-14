@@ -8,11 +8,15 @@ Project Integrations is backend service built with Python, FastAPI, PostgreSQL, 
 # Before Getting Started
 ### 1. Instagram Setup Manually 
 
-First, you'll need to manually create an app on the platform (e.g., Facebook Developer Console) [https://developers.facebook.com/apps/](https://developers.facebook.com/apps/).
+First, you'll need to manually create an app on the platform (e.g., Facebook Developer Console) 
+[https://developers.facebook.com/apps/](https://developers.facebook.com/apps/).
+
 <div style="display: flex; gap: 10px;">
   <img src="https://github.com/user-attachments/assets/5935d6d6-b80f-486f-acd7-2dfc223dc051" alt="createapp" width="300">
 </div>
+
 Then ->
+
 <div style="display: flex; gap: 10px;">
   <img src="https://github.com/user-attachments/assets/f5b271a2-ad1d-486f-9c13-1552b913c946" alt="Screenshot" width="300" height="150">
   <img src="https://github.com/user-attachments/assets/74d7f319-1b58-46c6-acbf-36121556e791" alt="createapp" width="300">
@@ -20,6 +24,7 @@ Then ->
 </div>
 
 Enable the Webhook Product and Instagram API Product within the app.
+
 <div style="display: flex; gap: 10px;">
   <img src="https://github.com/user-attachments/assets/788dc969-e631-4238-9927-dad5ca4d583b" width="300">
   <img src="https://github.com/user-attachments/assets/cd511ce3-a59f-4eef-a045-4ad605896e2b" alt="Screenshot" width="300">
@@ -27,33 +32,35 @@ Enable the Webhook Product and Instagram API Product within the app.
 
 Then you'll see in the left side bar App-Settings section, select and open it.
 Then fillout form and make sure to turn on Live Mode.
+
 <img src="https://github.com/user-attachments/assets/432f575e-5204-4a60-b679-f8ad8725f284" width="400">
 
 For now skip part where you have to pass verification process for your app to become publicly available!
 Here add Instagram tester account by username!
+
 <img src="https://github.com/user-attachments/assets/ac9a0462-86a0-4804-a5dc-ac86b7f0b3fb" width="400">
 
 
 Then here youll get ask for permission
-![image](https://github.com/user-attachments/assets/f984ef9d-e901-4f52-9906-6ba4f25eb26e)
-=====
+
+<img src="https://github.com/user-attachments/assets/f984ef9d-e901-4f52-9906-6ba4f25eb26e" width="400">
+
 Then run script and make request to this endpoint
+
 {domain}/v1/instagram/automation
 
-This is a one-time manual step, so it's not automated.
+This is a one-time manual step, so it's not automated.  😄
 
 
 # Getting Started
+
 You can run this project using Docker for convenience or set it up manually by installing dependencies.
 
-
-# Create .env file
+### Create .env file
 
 ASYNC_DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/db_name
 SYNC_DATABASE_URL=postgresql://username:password@localhost:5432/db_name
-
 REDIS_URL=redis://redis:6379/0
-
 
 # Running with Docker
 Clone the repository:
