@@ -1,8 +1,10 @@
 # Integrations
 
-This service integrates Instagram, WhatsApp, and Telegram into your application. It simplifies the configuration process by automating repetitive tasks and provides a seamless way to interact with users through these platforms.
+This service integrates **Instagram**, **WhatsApp**, and **Telegram** into your application. 
 
-Project Integrations is backend service built with Python, FastAPI, PostgreSQL, SQLAlchemy, Redis and Celery.
+It simplifies the configuration process by automating repetitive tasks and provides a seamless way to interact with users through these platforms.
+
+Project Integrations is backend service built with ***Python***, FastAPI, PostgreSQL, SQLAlchemy, Redis and Celery.
 
 
 # Before Getting Started
