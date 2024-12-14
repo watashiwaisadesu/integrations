@@ -20,11 +20,11 @@ Then ->
 </div>
 
 Enable the Webhook Product and Instagram API Product within the app.
-======
-![image](https://github.com/user-attachments/assets/788dc969-e631-4238-9927-dad5ca4d583b)
-======
-![image](https://github.com/user-attachments/assets/cd511ce3-a59f-4eef-a045-4ad605896e2b)
-======
+<div style="display: flex; gap: 10px;">
+  <img src="https://github.com/user-attachments/assets/788dc969-e631-4238-9927-dad5ca4d583b" width="300">
+  <img src="https://github.com/user-attachments/assets/cd511ce3-a59f-4eef-a045-4ad605896e2b" alt="Screenshot" width="300">
+</div>
+
 Then you'll see in the left side bar App-Settings section, select and open it.
 Then fillout form and make sure to turn on Live Mode.
 ![image](https://github.com/user-attachments/assets/432f575e-5204-4a60-b679-f8ad8725f284)
