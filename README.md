@@ -9,6 +9,8 @@ Project Integrations is backend service built with Python, FastAPI, PostgreSQL, 
 ### 1. Instagram Setup Manually 
 
 First, you'll need to manually create an app on the platform (e.g., Facebook Developer Console) [https://developers.facebook.com/apps/](https://developers.facebook.com/apps/).
+<img src="https://github.com/user-attachments/assets/5935d6d6-b80f-486f-acd7-2dfc223dc051" alt="createapp" width="600">
+==
 ![createapp](https://github.com/user-attachments/assets/5935d6d6-b80f-486f-acd7-2dfc223dc051)
 
 ======
