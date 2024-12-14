@@ -54,16 +54,19 @@ This is a one-time manual step, so it's not automated.  😄
 
 # Getting Started
 
-You can run this project using Docker for convenience or set it up manually by installing dependencies.
-
 ### Create .env file
 
+```env
 ASYNC_DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/db_name
 SYNC_DATABASE_URL=postgresql://username:password@localhost:5432/db_name
 REDIS_URL=redis://redis:6379/0
+```
 
-# Running with Docker
+You can run this project using Docker for convenience or set it up manually by installing dependencies.
+
+## Running with Docker
 Clone the repository:
+
 
 Ensure Docker and Docker Compose are installed on your system.
 
