@@ -35,11 +35,8 @@ Here add Instagram tester account by username!
 Then here youll get ask for permission
 ![image](https://github.com/user-attachments/assets/f984ef9d-e901-4f52-9906-6ba4f25eb26e)
 =====
-Then go to ->
-![image](https://github.com/user-attachments/assets/e4c8065d-4547-4401-b574-c029bae8e77f)
-=====
-choose instagram
-
+Then run script and make request to this endpoint
+{domain}/v1/instagram/automation
 
 This is a one-time manual step, so it's not automated.
 
