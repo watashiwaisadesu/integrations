@@ -56,6 +56,8 @@ This is a one-time manual step, so it's not automated.  😄
 
 # Getting Started
 
+## Using DOCKER
+
 ### Create `.env` file
 
 Create a `.env` file in the root directory of your project with the following content:
@@ -98,32 +100,39 @@ Once the application is running, you can access it in your browser at:
 
 http://localhost:8000/v1/docs
 
-# Manual Setup
+## Manual Setup
 If you prefer to set up the application without Docker, follow these steps:
 
-# 1. Install Dependencies
-Make sure you have Python 3.11+ installed. Create a virtual environment and install dependencies:
-
+## 1. Install Dependencies
+Make sure you have **Python 3.11+** installed. Create a virtual environment and install dependencies:
+```bash
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-# 2. Configure the Environment
-Create a .env file in the root directory with the following variables:
+```
 
+## 2. Configure the Environment
+Create a `.env` file in the root directory with the following variables:
+
+```env
 ASYNC_DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/db_name
 SYNC_DATABASE_URL=postgresql://username:password@localhost:5432/db_name
-
 REDIS_URL=redis://localhost:6379/0
+```
 
-# 3. Run Database Migrations
+## 3. Run Database Migrations
 Initialize the database schema using Alembic:
-
+```bash
 alembic upgrade head
-
-# 4. Start the Application
+```
+## 4. Start the Application
 Run the application:
-
+```bash
 uvicorn app.main:app 
-
-# License
-This project is licensed under the MIT License - see the LICENSE file for details.
+```
+In new terminal
+```bash
+celery -A src.core.celery_setup worker --loglevel=INFO
+```
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
