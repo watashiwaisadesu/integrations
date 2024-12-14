@@ -5,8 +5,8 @@ This service integrates Instagram, WhatsApp, and Telegram into your application.
 Project Integrations is backend service built with Python, FastAPI, PostgreSQL, SQLAlchemy, Redis and Celery.
 
 
-## Before Getting Started
-# 1.Create an App Manually
+# Before Getting Started
+### 1.Instagram Setup Manually
 
 First, you'll need to manually create an app on the platform (e.g., Facebook Developer Console) https://developers.facebook.com/apps/.
 ![createapp](https://github.com/user-attachments/assets/5935d6d6-b80f-486f-acd7-2dfc223dc051)
