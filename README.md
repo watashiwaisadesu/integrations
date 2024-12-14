@@ -17,8 +17,8 @@ Project Integrations is a backend service built with:
 # Before Getting Started
 ### 1. Instagram Setup Manually 
 
-First, you'll need to manually create an app on the platform (e.g., Facebook Developer Console) 
-[https://developers.facebook.com/apps/](https://developers.facebook.com/apps/).
+First, you'll need to manually create an app on the platform:
+[Facebook Developer Console](https://developers.facebook.com/apps/)
 
 <div style="display: flex; gap: 10px;">
   <img src="https://github.com/user-attachments/assets/5935d6d6-b80f-486f-acd7-2dfc223dc051" alt="createapp" width="300">
