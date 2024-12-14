@@ -90,7 +90,7 @@ git clone https://github.com/watashiwaisadesu/integrations.git
 cd your-repository
 ```
 
-### Using DOCKER
+### Setup using DOCKER
 
 #### 1. Create `.env` file
 
