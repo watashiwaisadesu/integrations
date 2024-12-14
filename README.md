@@ -56,7 +56,7 @@ This is a one-time manual step, so it's not automated.  😄
 
 # Getting Started
 
-## Using DOCKER
+<h2><span style="color: blue;">Using DOCKER</span></h2>
 
 ### Create `.env` file
 
