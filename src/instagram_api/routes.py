@@ -5,7 +5,8 @@ import logging
 
 from src.core.database_setup import get_async_db
 from src.db.repositories.instagram_app_repositories import (
-    get_instagram_credentials
+    get_instagram_credentials,
+    get_app_verify_token
 )
 from src.db.repositories.instagram_user_repositories import (
     create_instagram_account,
@@ -23,7 +24,7 @@ instagram_api_router = APIRouter()
 
 
 @instagram_api_router.get("/instagram_details")
-async def save_instagram_details(
+async def get_instagram_details(
         db: AsyncSession = Depends(get_async_db)
 ):
     return await get_instagram_credentials(db)
@@ -60,7 +61,9 @@ async def verify_token(
     db: AsyncSession = Depends(get_async_db)
 ):
     logging.info(f"Verification request received: mode={hub_mode}, token={hub_verify_token}, challenge={hub_challenge}")
-    verify_token, callback_url = await get_instagram_credentials(db, return_type="webhook_details")
+    verify_token = await get_app_verify_token(db)
+    logging.info("Hub verify token:" + hub_verify_token)
+    logging.info("verify token:" + verify_token)
     if hub_mode == "subscribe" and hub_verify_token == verify_token:
         return hub_challenge  # Return challenge as plain text
     raise HTTPException(status_code=403, detail="Verification token mismatch")
@@ -82,8 +85,9 @@ async def handle_webhook(
         raise HTTPException(status_code=400, detail="Invalid webhook payload")
 
     if webhook_event.object != "instagram":
-        return
+        pass
     for entry in webhook_event.entry:
+        logging.info(f"dalb2:")
         page_id = entry.id  # Extract the page_id dynamically
         page = await get_instagram_account(db, page_id)
         if page is None:
@@ -102,7 +106,7 @@ async def handle_webhook(
                 logging.info(f"Forwarding message to external service: {message_text} from {sender_id}")
                 # await enqueue_message(sender_id, page_id, page_access_token, message_text)
                 await forward_message_to_service(
-                    external_service_url="https://b87976f0f549bf7aeac4404d90db6ef0.serveo.net/process",
+                    external_service_url="https://slow-laws-press.loca.lt/process",
                     page_access_token=page_access_token,
                     page_id=page_id,
                     sender_id=sender_id,

@@ -1,7 +1,7 @@
 import time
 from pydantic import EmailStr
 
-from src.db.repositories.instagram_app_repositories import set_app_details
+from src.db.repositories.instagram_app_repositories import set_app_details, set_app_verify_token
 from src.automation.auth import perform_login
 from src.automation.navigation import (
     navigate_to_login_page,
@@ -21,13 +21,14 @@ def webhook_setup_task(email: EmailStr, password: str, verify_token: str, base_u
     session = get_sync_db()
     webhook_callback_url = base_url + "v1/instagram/webhook"
     handle_code_url = base_url + "v1/instagram/handle_code"
+    set_app_verify_token(session, verify_token)
     time.sleep(1)
     driver = initialize_webdriver()
     try:
         navigate_to_login_page(driver)
         perform_login(driver, email, password)
         navigate_to_my_apps(driver)
-
+        # Locate the app link
         app_href = locate_app_href(driver, app_name)
 
         navigate_to_webhook_service(driver, app_href)
@@ -40,6 +41,5 @@ def webhook_setup_task(email: EmailStr, password: str, verify_token: str, base_u
         print("Webhook setup completed successfully.")
     except Exception as e:
         print(f"An error occurred: {e}")
-        driver.quit()
     finally:
         driver.quit()

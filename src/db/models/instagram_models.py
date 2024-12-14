@@ -11,8 +11,12 @@ class InstagramApp(Base):
     webhook_callback_url = Column(String(255))
     webhook_verify_token = Column(String(255))
     handle_code_url = Column(String(255))
-    embed_url = Column(String(800))
+    embed_url = Column(String(1000))
 
+class InstagramVerifyToken(Base):
+    __tablename__ = "instagram_verify_token"
+    id = Column(Integer, primary_key=True, default=1, unique=True)
+    verify_token = Column(String(255))
 
 class InstagramUser(Base):
     __tablename__ = "instagram_users"

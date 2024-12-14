@@ -30,10 +30,15 @@ def navigate_to_instagramapi_service(driver, app_href):
     print(f"Navigated to API Setup page: {api_setup_url}")
 
 def locate_app_href(driver, app_name: str):
-    """Locate the 'neuro-employees' app."""
-    app_link = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, f"//div[contains(text(), '{app_name}')]/ancestor::a"))
-    )
-    app_href = app_link.get_attribute("href")
-    print(f"{app_name} app located: {app_href}")
-    return app_href
+    """Locate the app by name and return its href link."""
+    try:
+        # Wait for the app link to be located
+        app_link = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, f"//div[contains(text(), '{app_name}')]/ancestor::a"))
+        )
+        app_href = app_link.get_attribute("href")
+        print(f"{app_name} app located: {app_href}")
+        return app_href
+    except Exception:
+        # Raise a custom error if the app is not found
+        raise ValueError(f"The app '{app_name}' does not exist or could not be located.")

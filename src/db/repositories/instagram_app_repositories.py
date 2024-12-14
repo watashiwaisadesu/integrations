@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
-from src.db.models.instagram_models import InstagramApp
+from src.db.models.instagram_models import InstagramApp, InstagramVerifyToken
 
 class InstagramCredentials:
     def __init__(self, app):
@@ -90,3 +90,19 @@ def set_app_details(db: Session, app_id: str, app_secret: str, embed_url: str, h
 
     print("webhook details set to db")
     db.commit()
+
+def set_app_verify_token(db: AsyncSession, webhook_verify_token: str):
+    app =  db.get(InstagramVerifyToken, 1)
+    if app is None:
+        app = InstagramVerifyToken(verify_token=webhook_verify_token)
+        db.add(app)
+    else:
+        app.verify_token = webhook_verify_token
+
+    db.commit()
+
+async def get_app_verify_token(db: AsyncSession):
+    app = await db.get(InstagramVerifyToken, 1)
+    if app:
+        return app.verify_token
+    return None
