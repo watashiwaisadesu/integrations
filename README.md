@@ -55,17 +55,17 @@ Next, go to the **App Settings** section in the left sidebar, fill out the requi
 
 <img src="https://github.com/user-attachments/assets/432f575e-5204-4a60-b679-f8ad8725f284" width="400">
 
-### 4. Add Instagram Tester Accounts
+#### 4. Add Instagram Tester Accounts
 For now, skip the app verification process to make your app publicly available. Instead, add Instagram tester accounts by username:
 
 <img src="https://github.com/user-attachments/assets/ac9a0462-86a0-4804-a5dc-ac86b7f0b3fb" width="400">
 
-### 5. Grant Permissions
+#### 5. Grant Permissions
 Once you’ve added the Instagram tester account, you’ll be asked to grant permissions. This step is essential to ensure access to the required APIs.
 
 <img src="https://github.com/user-attachments/assets/f984ef9d-e901-4f52-9906-6ba4f25eb26e" width="400">
 
-### 6. Make Requests to the Instagram Endpoint
+#### 6. Make Requests to the Instagram Endpoint
 Finally, run the provided script and make a request to the following endpoint:
 ```
 {domain}/v1/instagram/automation
@@ -79,9 +79,9 @@ Finally, run the provided script and make a request to the following endpoint:
 
 
 
-# Getting Started
+## Getting Started
 
-## Clone the repository:
+#### Clone the repository:
 
 To get started, clone the repository from GitHub:
 
@@ -90,9 +90,9 @@ git clone https://github.com/watashiwaisadesu/integrations.git
 cd your-repository
 ```
 
-## Using DOCKER
+### Using DOCKER
 
-### 1. Create `.env` file
+#### 1. Create `.env` file
 
 Create a `.env` file in the root directory of your project with the following content:
 
@@ -104,7 +104,7 @@ REDIS_URL=redis://redis:6379/0
 
 This file is necessary for the application to run correctly.
 
-### 2. Running with Docker
+#### 2. Running with Docker
 
 Ensure **Docker** and **Docker Compose** are installed on your system.
 
@@ -114,21 +114,21 @@ Run the application using Docker Compose:
 docker-compose up --build
 ```
 
-### 3. What This Command Does:
+#### 3. What This Command Does:
 - Build the Docker images.
 - Start the backend application.
 - Set up the database and other dependencies (e.g., Redis).
   
-### 4. Access the application:
+#### 4. Access the application:
 
 Once the application is running, you can access it in your browser at:
 
 http://localhost:8000/v1/docs
 
-## Manual Setup
+### Manual Setup
 If you prefer to set up the application without Docker, follow these steps:
 
-### 1. Install Dependencies
+#### 1. Install Dependencies
 Make sure you have **Python 3.11+** installed. Create a virtual environment and install dependencies:
 ```bash
 python3 -m venv venv
@@ -136,7 +136,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. Configure the Environment
+#### 2. Configure the Environment
 Create a `.env` file in the root directory with the following variables:
 
 ```env
@@ -145,19 +145,19 @@ SYNC_DATABASE_URL=postgresql://username:password@localhost:5432/db_name
 REDIS_URL=redis://localhost:6379/0
 ```
 
-### 3. Run Database Migrations
+#### 3. Run Database Migrations
 Initialize the database schema using Alembic:
 ```bash
 alembic upgrade head
 ```
-### 4. Start the Application
+#### 4. Start the Application
 Run the application:
 ```bash
 uvicorn app.main:app 
 ```
-In new terminal
+also run in new terminal
 ```bash
 celery -A src.core.celery_setup worker --loglevel=INFO
 ```
-### License
+#### License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
