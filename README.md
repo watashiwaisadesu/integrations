@@ -1,5 +1,16 @@
 # Integrations
 
+# Table of Contents
+
+1. [Introduction](#introduction)  
+2. [Step-by-Step Guide: Setting up Instagram Integration](#step-by-step-guide-setting-up-instagram-integration) 
+3. [Getting Started](#getting-started)  
+   - [Setup Using Docker](#setup-using-docker)  
+   - [Manual Setup](#manual-setup)  
+
+
+## Introduction
+
 This service integrates **_Instagram_**, **_WhatsApp_**, and **_Telegram_** into your application. 
 
 It simplifies the configuration process by automating repetitive tasks and provides a seamless way to interact with users through these platforms.
@@ -14,10 +25,9 @@ Project Integrations is a backend service built with:
 - **_Docker_**
 
 
-# Before Getting Started
 ## Step-by-Step Guide: Setting up Instagram Integration
 
-### 1. Create an App on the Facebook Developer Console
+#### 1. Create an App on the Facebook Developer Console
 
 First, you'll need to manually create an app on the platform:
 [Facebook Developer Console](https://developers.facebook.com/apps/)
@@ -32,7 +42,7 @@ First, you'll need to manually create an app on the platform:
   <img src="https://github.com/user-attachments/assets/5020ce4c-472c-4649-b58b-094ea24ab6e5" alt="Screenshot" width="300">
 </div>
 
-### 2. Configure Products in the App
+#### 2. Configure Products in the App
 After creating the app, you need to enable the **Webhook Product** and **Instagram API Product**:
 
 <div style="display: flex; gap: 10px;">
@@ -40,7 +50,7 @@ After creating the app, you need to enable the **Webhook Product** and **Instagr
   <img src="https://github.com/user-attachments/assets/cd511ce3-a59f-4eef-a045-4ad605896e2b" alt="Screenshot" width="300">
 </div>
 
-### 3. Update App Settings and Turn on Live Mode
+#### 3. Update App Settings and Turn on Live Mode
 Next, go to the **App Settings** section in the left sidebar, fill out the required form fields, and turn on **Live Mode** for your app:
 
 <img src="https://github.com/user-attachments/assets/432f575e-5204-4a60-b679-f8ad8725f284" width="400">
