@@ -11,6 +11,7 @@ Project Integrations is a backend service built with:
 - **_SQLAlchemy_**
 - **_Redis_**
 - **_Celery_**.
+- **_Docker_**
 
 
 # Before Getting Started
