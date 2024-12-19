@@ -1,18 +1,17 @@
 from fastapi import FastAPI
 
 from src.instagram_api.routes import instagram_api_router
-from src.automation.routes import webhook_settings_router
 from src.core.middleware import register_middleware
-from src.whatsapp_api.test import whatsapp_api_router
+from src.whatsapp_api.routes import whatsapp_api_router
 from src.telegram_api.routes import telegram_api_router
+from src.external_service.routes import external_service_api_router
 # from src.utils.error_handler import register_all_errors
 
 version = "v1"
 
 description = """
 Integrations Service using
-selenium setup webhook and get necessary details at 
-https://developers.facebook.com 
+Instagram Graph API, Telethon, GreenAPI
 """
 
 version_prefix = f"/{version}"
@@ -33,7 +32,8 @@ app = FastAPI(
 register_middleware(app)
 # register_all_errors(app)
 
+app.include_router(external_service_api_router, prefix=f"{version_prefix}/external_service", tags=["External Service"])
 app.include_router(instagram_api_router, prefix=f"{version_prefix}/instagram", tags=["InstagramAPI"])
-app.include_router(whatsapp_api_router, prefix=f"{version_prefix}/whatsapp", tags=["WhatsappAPI"])
 app.include_router(telegram_api_router, prefix=f"{version_prefix}/telegram", tags=["TelegramAPI"])
-app.include_router(webhook_settings_router, prefix=f"{version_prefix}/webhook", tags=["WebhookSetup"])
+app.include_router(whatsapp_api_router, prefix=f"{version_prefix}/whatsapp", tags=["WhatsappAPI"])
+

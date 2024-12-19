@@ -28,3 +28,9 @@ async def get_user_by_phone(phone_number: str, db: AsyncSession) -> TelegramUser
         sa.select(TelegramUser).where(TelegramUser.phone_number == phone_number)
     )
     return result.scalars().first()
+
+async def get_user_by_username(username: str, db: AsyncSession) -> TelegramUser:
+    result = await db.execute(
+        sa.select(TelegramUser).where(TelegramUser.username == username)
+    )
+    return result.scalars().first()

@@ -24,13 +24,15 @@ class TelegramUser(Base):
     session = Column(String, nullable=True)  # Will be None until logged in
     phone_number = Column(String, nullable=False, unique=True)
     username = Column(String, nullable=True)
+    user_id = Column(String, nullable=True)
     phone_code_hash = Column(String, nullable=True)  # New column for code hash storage
+    bot_url = Column(String, nullable=True)
 
     app_id = Column(Integer, ForeignKey('telegram_app.id', ondelete='CASCADE'), nullable=True)
     app = relationship("TelegramApp", back_populates="users")
 
 
-class MessageLog(Base):
+class TelegramMessageLog(Base):
     __tablename__ = 'telegram_message_logs'
 
     id = Column(Integer, primary_key=True, index=True)

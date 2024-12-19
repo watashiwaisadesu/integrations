@@ -13,10 +13,7 @@ class InstagramApp(Base):
     handle_code_url = Column(String(255))
     embed_url = Column(String(1000))
 
-class InstagramVerifyToken(Base):
-    __tablename__ = "instagram_verify_token"
-    id = Column(Integer, primary_key=True, default=1, unique=True)
-    verify_token = Column(String(255))
+
 
 class InstagramUser(Base):
     __tablename__ = "instagram_users"
@@ -25,7 +22,11 @@ class InstagramUser(Base):
     user_id = Column(String(255), nullable=False)
     access_token = Column(Text, nullable=False)
     username = Column(String(255), nullable=True)
+    bot_url = Column(String(255), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
+
 
 

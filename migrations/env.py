@@ -7,8 +7,10 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 from src.core.database_setup import Base
+from src.db.models.external_service_models import ExternalServiceApp
 from src.db.models.instagram_models import InstagramUser, InstagramApp
-from src.db.models.telegram_models import MessageLog, TelegramApp, TelegramUser
+from src.db.models.telegram_models import TelegramMessageLog, TelegramApp, TelegramUser
+from src.db.models.whatsapp_models import WhatsAppUser
 from src.core.config import ASYNC_DATABASE_URL
 
 

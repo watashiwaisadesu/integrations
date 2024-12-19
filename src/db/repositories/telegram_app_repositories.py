@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.models.telegram_models import TelegramApp
 
-async def upsert_telegram_app(api_id: str, api_hash: str, db: AsyncSession) -> TelegramApp:
+async def set_telegram_app(api_id: str, api_hash: str, db: AsyncSession) -> TelegramApp:
     """
     Ensure only one Telegram app exists. If not found, create it. Otherwise, update.
     """

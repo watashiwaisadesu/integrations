@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import WebDriverException
-from src.automation.utils import (
+from src.utils.automation_tools import (
     wait_for_element,
     scroll_into_view,
     clear_and_type,

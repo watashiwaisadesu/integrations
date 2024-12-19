@@ -1,51 +1,43 @@
 import asyncio
 
-import httpx
+import requests
 import logging
+import httpx
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-
-async def send_instagram_message(page_token: str, page_id: str, recipient_id: str, message: str):
-    """
-    Sends a message to the customer via Instagram Graph API.
-    """
-    url = f"https://graph.instagram.com/v21.0/{page_id}/messages"
-
+# Define a method to send a WhatsApp message using the Green API
+async def send_whatsapp_message(chat_id: str, message: str,api_url: str, id_instance: str, api_token_instance: str):
+    """Send a WhatsApp message using the Green API."""
+    url = f"{api_url}/waInstance{id_instance}/sendMessage/{api_token_instance}"
     payload = {
-        "recipient": {"id": recipient_id},
-        "message": {"text": message},
+        "chatId": chat_id,
+        "message": message
     }
-
     headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {page_token}",
+        'Content-Type': 'application/json'
     }
-
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.post(url, json=payload, headers=headers)
-            response.raise_for_status()
-            logging.info(f"Message sent successfully to {recipient_id}: {response.json()}")
-            return response.json()
-        except httpx.RequestError as e:
-            logging.error(f"Request error while sending Instagram message: {e}")
-        except httpx.HTTPStatusError as e:
-            logging.error(f"HTTP error while sending Instagram message: {e.response.json()}")
-
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        logger.info(f"Message sent. Response: {response.text}")
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error sending message: {e}")
+        return None
 
 
 async def forward_message_to_service(
     bot_url: str,
-    page_access_token: str,
-    page_id: str,
-    sender_id: str,
-    message_text: str,
+    chat_id: str,
+    api_url: str,
+    id_instance: str,
+    api_token_instance: str,
+    message_text: str = None,
 ):
     payload = {
-        "platform": "instagram",
+        "platform": "whatsapp",
         "message_text": message_text,
     }
     headers = {"Content-Type": "application/json"}
@@ -83,11 +75,12 @@ async def forward_message_to_service(
                     return None
 
                 # Send the external service's response back to the user
-                await send_instagram_message(
-                    page_token=page_access_token,
-                    page_id=page_id,
-                    recipient_id=sender_id,
+                await send_whatsapp_message(
+                    chat_id=chat_id,
                     message=result.get("reply", "No reply provided"),
+                    api_url=api_url,
+                    id_instance=id_instance,
+                    api_token_instance=api_token_instance,
                 )
                 break  # Exit loop on success
 

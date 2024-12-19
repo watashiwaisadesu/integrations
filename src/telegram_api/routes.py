@@ -6,23 +6,25 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.telegram_api.schemas import PhoneNumberRequest, VerificationCodeRequest, TelegramAppSchema
 from src.core.database_setup import get_async_db
 from src.telegram_api.service import (
-    upsert_telegram_app,
     request_code_service,
     submit_code_service
 )
+from src.db.repositories.telegram_app_repositories import set_telegram_app
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 telegram_api_router = APIRouter()
 
+
 @telegram_api_router.post("/set-app/")
 async def set_telegram_app(data: TelegramAppSchema, db: AsyncSession = Depends(get_async_db)):
     """
     Set or update the Telegram app (api_id and api_hash).
     """
-    app = await upsert_telegram_app(api_id=data.api_id, api_hash=data.api_hash, db=db)
+    app = await set_telegram_app(api_id=data.api_id, api_hash=data.api_hash, db=db)
     return {"status": "App set successfully", "app": {"api_id": app.api_id, "api_hash": app.api_hash}}
+
 
 @telegram_api_router.post("/request-code/")
 async def request_code(data: PhoneNumberRequest, db: AsyncSession = Depends(get_async_db)):
@@ -35,6 +37,7 @@ async def request_code(data: PhoneNumberRequest, db: AsyncSession = Depends(get_
     except Exception as e:
         logging.error(f"Error requesting code for {data.phone_number}: {e}")
         raise HTTPException(status_code=500, detail="Failed to send code.")
+
 
 @telegram_api_router.post("/submit-code/")
 async def submit_code(data: VerificationCodeRequest, db: AsyncSession = Depends(get_async_db)):

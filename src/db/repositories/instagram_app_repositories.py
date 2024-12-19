@@ -1,6 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
-from src.db.models.instagram_models import InstagramApp, InstagramVerifyToken
+
+from src.db.models.instagram_models import InstagramApp
+
+
 
 class InstagramCredentials:
     def __init__(self, app):
@@ -34,6 +37,7 @@ class InstagramCredentials:
             "embed_url": self.embed_url,
         }
 
+
 async def get_instagram_credentials(db: AsyncSession, return_type="all"):
     """
     Fetch Instagram credentials with flexible return types.
@@ -57,18 +61,15 @@ async def get_instagram_credentials(db: AsyncSession, return_type="all"):
     else:
         raise ValueError(f"Unknown return_type: {return_type}")
 
-async def set_instagram_credentials(db: AsyncSession, app_id: str, app_secret: str):
-    app = await db.get(InstagramApp, 1)
-    if app is None:
-        app = InstagramApp(inst_app_id=app_id, inst_app_secret=app_secret)
-        db.add(app)
-    else:
-        app.inst_app_id = app_id
-        app.inst_app_secret = app_secret
-    await db.commit()
 
-
-def set_app_details(db: Session, app_id: str, app_secret: str, embed_url: str, handle_code_url: str, webhook_verify_token: str, webhook_callback_url: str):
+def set_app_details(db: Session,
+                    app_id: str,
+                    app_secret: str,
+                    embed_url: str,
+                    handle_code_url: str,
+                    webhook_verify_token: str,
+                    webhook_callback_url: str,
+):
     app = db.get(InstagramApp, 1)
     if app is None:
         app = InstagramApp(
@@ -91,18 +92,20 @@ def set_app_details(db: Session, app_id: str, app_secret: str, embed_url: str, h
     print("webhook details set to db")
     db.commit()
 
+
 def set_app_verify_token(db: AsyncSession, webhook_verify_token: str):
-    app =  db.get(InstagramVerifyToken, 1)
+    app =  db.get(InstagramApp, 1)
     if app is None:
-        app = InstagramVerifyToken(verify_token=webhook_verify_token)
+        app = InstagramApp(webhook_verify_token=webhook_verify_token)
         db.add(app)
     else:
-        app.verify_token = webhook_verify_token
-
+        app.webhook_verify_token = webhook_verify_token
     db.commit()
 
+
 async def get_app_verify_token(db: AsyncSession):
-    app = await db.get(InstagramVerifyToken, 1)
+    app = await db.get(InstagramApp, 1)
     if app:
-        return app.verify_token
+        return app.webhook_verify_token
     return None
+

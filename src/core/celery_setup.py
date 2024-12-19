@@ -6,4 +6,5 @@ celery = Celery(
     backend=REDIS,
 )
 
-celery.autodiscover_tasks(["src.tasks.webhook_setup_task"])
+celery.autodiscover_tasks(["src.tasks.app_setup_task"])
+celery.autodiscover_tasks(["src.tasks.create_instance_task"])
