@@ -1,23 +1,30 @@
 from fastapi import FastAPI, HTTPException, Request
 import logging
+import openai
+from src.core.config import OPENAI_API_KEY
 
-# Initialize FastAPI app
+from src.utils.middleware import register_middleware
+
+# Инициализируем FastAPI-приложение
 app = FastAPI()
+register_middleware(app)
 
-# Set up logging
+# Логирование
 logging.basicConfig(level=logging.INFO)
 
-# Example in-memory storage to simulate processing
+# Пример хранилища (для демонстрации)
 processed_messages = {}
 
+# Укажите свой ключ (или используйте переменную окружения)
+openai.api_key = OPENAI_API_KEY
 
 @app.post("/username/bot/1000")
 async def process_message(request: Request):
     """
-    Endpoint to receive messages, process them, and return a response.
+    Endpoint для приёма сообщений, обращения к OpenAI и возвращения ответа.
     """
     try:
-        # Parse the incoming message payload
+        # Получаем payload
         payload = await request.json()
         logging.info(f"Received message for processing: {payload}")
 
@@ -27,23 +34,46 @@ async def process_message(request: Request):
         if not platform or not message_text:
             raise HTTPException(status_code=400, detail="Missing required fields in payload")
 
-        # Simulate processing (e.g., NLP, database lookup, etc.)
-        response_text = f"Processed message on {platform}: {message_text[::-1]}"  # Reverse the text as a demo
+        # Формируем контекст для ChatCompletion
+        # Подход №1: минималистичный — каждый запрос считается самостоятельным
+        # Подход №2: сохранять контекст истории диалога.
+        # Здесь для простоты просто один раз вызываем модель с системной инструкцией и user-подсказкой
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "You are actual me a human Islambek. Respond in a natural, human-like way. "
+                    "If someone asks 'who are you?', respond: 'I'm Islambek, I'm a seller of books'."
+                )
+            },
+            {
+                "role": "user",
+                "content": message_text
+            }
+        ]
 
-        # Store in memory (for demo purposes)
+        # Запрос к ChatCompletion (модель может быть 'gpt-3.5-turbo' или другая)
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            temperature=0.7
+        )
+
+        # Извлекаем ответ бота
+        response_text = completion.choices[0].message["content"].strip()
+
+        # Сохраняем в памяти (для демо)
         processed_messages[message_text] = {
             "platform": platform,
             "message_text": message_text,
             "response_text": response_text,
         }
 
-        # Respond with the processed message
-        json = {"status": "success", "reply": response_text}
-        print(f"Return back: {json}")
-        return json
+        # Формируем ответ
+        json_resp = {"status": "success", "reply": response_text}
+        logging.info(f"Replying with: {json_resp}")
+        return json_resp
 
     except Exception as e:
         logging.error(f"Error processing message: {e}")
         raise HTTPException(status_code=500, detail="Error processing the message")
-
-

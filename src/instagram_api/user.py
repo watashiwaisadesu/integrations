@@ -1,40 +1,61 @@
-import requests
+# src/instagram_api/user.py
 
-def get_instagram_user_info(access_token):
-    # Define the endpoint and parameters
+import requests
+import logging
+
+from src.utils.errors_handler import ExternalServiceError
+
+logger = logging.getLogger(__name__)
+
+def get_instagram_user_info(access_token: str) -> dict:
+    """
+    Retrieve user info (user_id, username, account_type) from the Instagram Graph API.
+    """
     url = "https://graph.instagram.com/v21.0/me"
     params = {
-        "fields": "user_id,username,account_type",  # Request the user_id and username fields
-        "access_token": access_token  # Pass the access token
+        "fields": "user_id,username,account_type",
+        "access_token": access_token,
     }
 
-    # Send the GET request to retrieve user info
-    response = requests.get(url, params=params)
+    try:
+        response = requests.get(url, params=params)
+    except requests.exceptions.RequestException as e:
+        # Network-level error (DNS, connection refused, etc.)
+        logger.error(f"Request error while fetching Instagram user info: {e}")
+        raise ExternalServiceError("Failed to communicate with Instagram Graph endpoint") from e
 
-    # Check if the request was successful
     if response.status_code == 200:
-        user_info = response.json()
-        print(f"User info:{user_info}")
-        return user_info
+        data = response.json()
+        logger.debug(f"Instagram user info: {data}")
+        return data
     else:
-        raise Exception(f"Failed to get user info. Status code: {response.status_code}, Response: {response.text}")
+        logger.error(f"Failed to get user info (HTTP {response.status_code}): {response.text}")
+        raise ExternalServiceError(
+            f"Failed to get user info (HTTP {response.status_code}): {response.text}"
+        )
 
 
-def get_instagram_media(instagram_id, access_token):
-    # Define the endpoint and parameters
+def get_instagram_media(instagram_id: str, access_token: str) -> dict:
+    """
+    Retrieve media data for a given Instagram ID from the Instagram Graph API.
+    """
     url = f"https://graph.instagram.com/v21.0/{instagram_id}/media"
     params = {
-        "access_token": access_token  # Pass the access token
+        "access_token": access_token,
     }
 
-    # Send the GET request to retrieve media
-    response = requests.get(url, params=params)
+    try:
+        response = requests.get(url, params=params)
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request error while fetching Instagram media: {e}")
+        raise ExternalServiceError("Failed to communicate with Instagram Graph endpoint") from e
 
-    # Check if the request was successful
     if response.status_code == 200:
-        media_data = response.json()
-        return media_data
+        data = response.json()
+        logger.debug(f"Instagram media data: {data}")
+        return data
     else:
-        raise Exception(f"Failed to get media data. Status code: {response.status_code}, Response: {response.text}")
-
-
+        logger.error(f"Failed to get media data (HTTP {response.status_code}): {response.text}")
+        raise ExternalServiceError(
+            f"Failed to get media data (HTTP {response.status_code}): {response.text}"
+        )

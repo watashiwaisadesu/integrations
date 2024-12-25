@@ -1,15 +1,24 @@
+# src/instagram_api/utils.py (or wherever you keep this function)
+
+import logging
 from urllib.parse import urlparse, parse_qs
 
-def extract_code_from_url(url):
+from src.utils.errors_handler import InvalidQueryParameter  # new custom exception
+
+logger = logging.getLogger(__name__)
+
+def extract_code_from_url(url: str):
     parsed_url = urlparse(url)
-    # redirect_uri = str(request.base_url) + "v1/instagram/handle_code"
-    # Construct the base URL
+    # Construct the base URL (redirect URI)
     redirect_uri = f"https://{parsed_url.netloc}{parsed_url.path}"
-    print(f"REDIRECT_URL: {redirect_uri}")
+    logger.debug(f"Parsed redirect URI: {redirect_uri}")
+
     query_params = parse_qs(parsed_url.query)
-
-    # Extract the 'code' parameter
     code = query_params.get('code', [None])[0]
-    print(f"CODE: {code}")
+    logger.debug(f"Extracted 'code' param from URL: {code}")
 
-    return redirect_uri,code
+    if code is None:
+        logger.error("Missing 'code' parameter in the URL")
+        raise InvalidQueryParameter("The 'code' query parameter is required and missing.")
+
+    return redirect_uri, code

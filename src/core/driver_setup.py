@@ -5,7 +5,7 @@ from selenium import webdriver
 
 def initialize_webdriver_headless():
     chrome_options = webdriverwire.ChromeOptions()
-    # chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--ignore-certificate-errors")  # Ignore SSL errors
     chrome_options.add_argument("--allow-insecure-localhost")  # Allow insecure SSL on localhost
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
