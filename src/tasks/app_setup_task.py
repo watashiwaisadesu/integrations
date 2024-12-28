@@ -3,15 +3,15 @@ import time
 from pydantic import EmailStr
 
 from src.db.repositories.instagram_app_repositories import set_app_details, set_app_verify_token
-from src.instagram_api.automation.auth import perform_login
-from src.instagram_api.automation.navigation import (
+from src.messengers.instagram_api.automation.auth import perform_login
+from src.messengers.instagram_api.automation.navigation import (
     navigate_to_login_page,
     navigate_to_my_apps,
     locate_app_href,
     navigate_to_webhook_service,
     navigate_to_instagramapi_service
 )
-from src.instagram_api.automation.webhook_manager import configure_webhook_product, configure_instagram_api_product
+from src.messengers.instagram_api.automation.webhook_manager import configure_webhook_product, configure_instagram_api_product
 from src.core.driver_setup import initialize_webdriver_headless
 from src.core.celery_setup import celery
 from src.core.database_setup import get_sync_db

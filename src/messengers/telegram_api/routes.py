@@ -1,11 +1,12 @@
 import logging
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import RedirectResponse, HTMLResponse
 
-from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.telegram_api.schemas import PhoneNumberRequest, VerificationCodeRequest, TelegramAppSchema
+from src.messengers.telegram_api.schemas import PhoneNumberRequest, VerificationCodeRequest, TelegramAppSchema
 from src.core.database_setup import get_async_db
-from src.telegram_api.service import (
+from src.messengers.telegram_api.service import (
     request_code_service,
     submit_code_service
 )
@@ -37,6 +38,7 @@ async def set_telegram_app_route(data: TelegramAppSchema, db: AsyncSession = Dep
         # Raise a 500-level error, or define your own custom exception
         raise InternalServerError("Failed to set Telegram app.")
 
+
 @telegram_api_router.post("/request-code/")
 async def request_code_route(
     data: PhoneNumberRequest,
@@ -61,18 +63,21 @@ async def request_code_route(
 @telegram_api_router.post("/submit-code/")
 async def submit_code_route(
     data: VerificationCodeRequest,
+    request: Request,
     db: AsyncSession = Depends(get_async_db)
 ):
     """
     Submit the received verification code and complete the login process.
     """
     try:
-        result = await submit_code_service(
+        user_id  = await submit_code_service(
             phone_number=data.phone_number,
             code=data.code,
             db=db
         )
-        return {"status": "Logged in successfully", "session": result["session"]}
+        base_url = f"https://{request.base_url.netloc}"
+        creation_link = f"{base_url}/v1/bot/bot_creation/telegram/{user_id}"
+        return RedirectResponse(url=creation_link, status_code=302)
     except ValueError as ve:
         # If the code is invalid, handle with a 400/422:
         logger.error(f"ValueError submitting code for {data.phone_number}: {ve}")

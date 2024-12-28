@@ -21,4 +21,4 @@ def extract_code_from_url(url: str):
         logger.error("Missing 'code' parameter in the URL")
         raise InvalidQueryParameter("The 'code' query parameter is required and missing.")
 
-    return redirect_uri, code
+    return  redirect_uri, code

@@ -9,5 +9,5 @@ class LogEntry(Base):
     id = Column(Integer, primary_key=True, index=True)
     timestamp = Column(TIMESTAMP, default=datetime.utcnow)
     log_level = Column(String(10))
-    message = Column(Text)
     source = Column(String(255))
+    message = Column(Text)

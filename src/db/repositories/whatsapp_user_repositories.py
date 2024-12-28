@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import select
+from sqlalchemy import select, update
 from src.db.models.whatsapp_models import WhatsAppUser
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,7 +11,8 @@ def create_or_update_whatsapp_user(
     id_instance: str,
     api_token: str,
     callback_url: str,
-    order_id: str
+    order_id: str,
+    bot_id: str
 ):
     """
     Create a new WhatsApp user or update the existing user if id_instance already exists.
@@ -38,17 +39,19 @@ def create_or_update_whatsapp_user(
             # Update existing user's data
             user.api_url = api_url
             user.api_token = api_token
-            user.bot_url = callback_url
+            user.callback_url = callback_url
             user.order_id = order_id
+            bot_id = bot_id
         else:
             # Create a new user
             user = WhatsAppUser(
                 api_url=api_url,
                 id_instance=id_instance,
                 api_token=api_token,
-                bot_url=callback_url,
+                callback_url=callback_url,
                 authorized=False,
-                order_id=order_id,
+                order_id = order_id,
+                bot_id = None
             )
             db.add(user)
 
@@ -66,7 +69,7 @@ def create_or_update_whatsapp_user(
         raise ValueError(f"Unexpected error: {e}")
 
 
-async def get_whatsapp_user(db: AsyncSession, id_instance: int):
+async def get_whatsapp_user_by_id(db: AsyncSession, id_instance: str):
     """
     Retrieve a WhatsApp user from the database based on id_instance, api_token,
     callback_url, and order_id.
@@ -85,7 +88,7 @@ async def get_whatsapp_user(db: AsyncSession, id_instance: int):
         # Asynchronous query to fetch a WhatsApp user
         result = await db.execute(
             select(WhatsAppUser).where(
-                WhatsAppUser.id_instance == id_instance,
+                WhatsAppUser.id_instance == int(id_instance),
             )
         )
         user = result.scalars().first()
@@ -94,4 +97,37 @@ async def get_whatsapp_user(db: AsyncSession, id_instance: int):
         # Log the error if necessary
         print(f"Error retrieving WhatsApp user: {e}")
         return None
+
+async def update_whatsapp_user_bot_id(
+    db: AsyncSession,
+    user_id: str,
+    bot_id: str
+):
+    query = (
+        update(WhatsAppUser)
+        .where(WhatsAppUser.id_instance == int(user_id))
+        .values(bot_id=bot_id)
+        .execution_options(synchronize_session="fetch")
+    )
+    await db.execute(query)
+    await db.commit()
+    return True
+
+
+async def update_whatsapp_user_phone(
+    db: AsyncSession,
+    id_instance: str,
+    phone_number: str
+):
+    query = (
+        update(WhatsAppUser)
+        .where(WhatsAppUser.id_instance == int(id_instance))
+        .values(phone_number=phone_number)
+        .execution_options(synchronize_session="fetch")
+    )
+    await db.execute(query)
+    await db.commit()
+    return True
+
+
 

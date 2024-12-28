@@ -1,23 +1,22 @@
 import asyncio
 import logging
-import httpx
 from telethon import TelegramClient, events
 from telethon.sessions import StringSession
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.models.telegram_models import TelegramMessageLog
-from src.db.repositories.external_service_app_repositories import get_app_external_service_base_url
+from src.bots.openai.service import handle_incoming_message
 from src.db.repositories.telegram_app_repositories import (
     get_current_app
 )
 from src.db.repositories.telegram_user_repositories import (
     add_or_update_telegram_user,
-    get_user_by_phone, get_user_by_username,
+    get_user_by_phone,
+    get_telegram_user_by_id,
 )
-from src.external_service.service import create_bot_request
 from src.utils.errors_handler import InternalServerError, TelegramMessageHandlingError
 
 logger = logging.getLogger(__name__)
+
 
 async def request_code_service(phone_number: str, db: AsyncSession):
     """
@@ -77,26 +76,23 @@ async def submit_code_service(phone_number: str, code: str, db: AsyncSession):
         session_string = client.session.save()
 
         me = await client.get_me()
-        my_user_id = me.id if me else None
+        user_id = me.id if me else None
         username = me.username if me else None
-
-        external_service_base_url = await get_app_external_service_base_url(db)
-        bot_url = await create_bot_request(username, external_service_base_url, True)
 
         await add_or_update_telegram_user(
             phone_number=phone_number,
             db=db,
             session=session_string,
             username=username,
-            user_id=str(my_user_id),
+            user_id=str(user_id),
             phone_code_hash=None,
-            bot_url=bot_url,
+            bot_id=None,
         )
 
         logger.info(f"User {phone_number} logged in successfully with username={username}.")
         asyncio.create_task(start_listening_service(client, phone_number, db))
 
-        return {"session": session_string}
+        return  user_id
 
     except ValueError:
         # Let the route handle ValueError with a 4xx
@@ -134,38 +130,35 @@ async def handle_new_message_service(event, client, db: AsyncSession):
     """
     try:
         if event.is_private:
+            print("listenTGinside")
             logger.debug(f"New private message event: {event}")
             me = await client.get_me()
-            username = me.username if me else "unknown_username"
-            sender = event.sender_id
-            input_text = event.raw_text
+            user_id = me.id if me else "unknown_userid"
+            sender_id = event.sender_id
+            message_text = event.raw_text
 
-            user = await get_user_by_username(username, db)
+            user = await get_telegram_user_by_id(db, user_id)
             if not user:
-                logger.warning(f"No DB user record found for Telegram username={username}")
+                logger.warning(f"No DB user record found for Telegram user_id={user_id}")
+            assistant_id = user.bot_id
 
-            # Save the message in the database
-            log_entry = TelegramMessageLog(sender=str(sender), input_text=input_text)
-            db.add(log_entry)
-            await db.commit()
+            logger.info(f"Message received from {sender_id}: {message_text}")
 
-            logger.info(f"Message received from {sender}: {input_text}")
-
-            # Forward to external service
-            response_text = await forward_message_to_service(user.bot_url, input_text)
-
+            response = await handle_incoming_message(
+                        db=db,
+                        sender_id=sender_id,
+                        owner_id=user_id,
+                        assistant_id=assistant_id,
+                        message=message_text,
+                        platform="telegram",
+                    )
             # Fallback if no valid response
-            if not response_text:
-                logger.warning(f"No valid response received for input: {input_text}")
-                response_text = "No response provided"
-
-            # Update DB with the output
-            log_entry.output_text = response_text
-            db.add(log_entry)
-            await db.commit()
+            if not response['response']:
+                logger.warning(f"No valid response received for input: {message_text}")
+                response = "No response provided"
 
             # Reply to the user in Telegram
-            await event.reply(response_text)
+            await event.reply(response['response'])
 
     except Exception as e:
         logger.error(f"Error handling message from {event.sender_id}: {e}")
@@ -173,70 +166,3 @@ async def handle_new_message_service(event, client, db: AsyncSession):
         # If this code is purely background (not in a FastAPI route), you can log or re-raise as you wish.
         raise TelegramMessageHandlingError("Error in handle_new_message_service") from e
 
-
-async def forward_message_to_service(bot_url: str, input_text: str):
-    """
-    Sends the user's message to the external service and retrieves the response.
-    Returns a fallback string if the service fails or an unexpected error occurs,
-    preserving your existing logic (don't break the flow).
-    """
-    payload = {
-        "platform": "telegram",
-        "message_text": input_text
-    }
-    headers = {"Content-Type": "application/json"}
-
-    limits = httpx.Limits(max_connections=200, max_keepalive_connections=100)
-    timeout = httpx.Timeout(10.0, connect=5.0, read=5.0, write=5.0)
-
-    async with httpx.AsyncClient(limits=limits, timeout=timeout) as client:
-        retries = 3
-        delay = 1
-
-        for attempt in range(retries):
-            try:
-                response = await client.post(bot_url, json=payload, headers=headers)
-
-                logger.debug(f"Attempt {attempt + 1}: status={response.status_code}, text={response.text}")
-
-                # If no text in response, treat as error
-                if not response.text:
-                    logger.error(f"Empty response from {bot_url}")
-                    return "No response provided"
-
-                # Attempt to parse JSON
-                try:
-                    result = response.json()
-                    logger.info(f"Received response from external service: {result}")
-                    return result.get("reply", "No reply provided")
-                except ValueError as json_err:
-                    logger.error(f"Invalid JSON from {bot_url}: {json_err}")
-                    logger.error(f"Raw response content: {response.text}")
-                    return "Invalid response format"
-
-            except httpx.HTTPStatusError as http_err:
-                logger.error(
-                    f"HTTP error from {bot_url} on attempt {attempt + 1}: "
-                    f"{http_err.response.status_code} - {http_err.response.text}"
-                )
-                if attempt < retries - 1:
-                    await asyncio.sleep(delay * (2 ** attempt))
-                else:
-                    return f"Error {http_err.response.status_code}: Service issue."
-
-            except httpx.RequestError as req_err:
-                logger.error(f"Request error contacting {bot_url} on attempt {attempt + 1}: {req_err}")
-                if attempt < retries - 1:
-                    await asyncio.sleep(delay * (2 ** attempt))
-                else:
-                    return "Service is unavailable. Please try again later."
-
-            except Exception as e:
-                logger.error(f"Unexpected error on attempt {attempt + 1}: {e}")
-                if attempt < retries - 1:
-                    await asyncio.sleep(delay * (2 ** attempt))
-                else:
-                    return "Unexpected error occurred."
-
-        # If we exhaust all retries:
-        return "Failed after multiple retries."

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+        }
+        .pending {
+            background-color: yellow;
+        }
+        .success {
+            background-color: lightgreen;
+        }
+        .failure {
+            background-color: lightcoral;
+        }
+        input[type="text"] {
+            padding: 8px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Check Task Status</h1>
+    <input type="text" id="taskIdInput" placeholder="Enter Task ID" />
+    <button onclick="submitTaskId()">Check Status</button>
+
+    <p id="statusMessage">Enter a task ID and submit to check status.</p>
+    <div id="qrCodeContainer"></div>
+
+    <script>
+        const baseUrl = '127.0.0.1:8000'; // Change this to your server URL
+
+        const taskIdInput = document.getElementById('taskIdInput');
+        const statusMessage = document.getElementById('statusMessage');
+        const qrCodeContainer = document.getElementById('qrCodeContainer');
+
+        async function checkTaskStatus(taskId) {
+            try {
+                const response = await fetch(`http://${baseUrl}/v1/whatsapp/task-status/${taskId}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+
+                // Check if the response is OK (status code 200)
+                if (!response.ok) {
+                    console.error(`Error fetching task status: ${response.statusText}`);
+                    statusMessage.textContent = `Error: ${response.statusText}`;
+                    statusMessage.className = 'status failure';
+                    return;
+                }
+
+                // Parse the JSON response
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    statusMessage.textContent = "QR code generated successfully!";
+                    statusMessage.className = 'status success';
+
+                    // Display QR code and start WebSocket connection
+                    if (data.result[0]) {
+                        qrCodeContainer.innerHTML = `<img src="data:image/png;base64,${data.result[0]}" alt="QR Code" />`;
+                    }
+
+                    // Start WebSocket connection
+                    startWebSocket(data.result[1], data.result[2], data.result[3]);
+                } else if (data.status === 'pending') {
+                    statusMessage.textContent = "Task is still being processed.";
+                    statusMessage.className = 'status pending';
+                    qrCodeContainer.innerHTML = '';
+                } else if (data.status === 'failure') {
+                    statusMessage.textContent = `Task failed: ${data.message}`;
+                    statusMessage.className = 'status failure';
+                    qrCodeContainer.innerHTML = '';
+                } else {
+                    statusMessage.textContent = "Task is in progress.";
+                    statusMessage.className = 'status';
+                    qrCodeContainer.innerHTML = '';
+                }
+            } catch (error) {
+                console.error("Error checking task status:", error);
+                statusMessage.textContent = "Error fetching task status.";
+                statusMessage.className = 'status failure';
+            }
+        }
+
+        // Function to start WebSocket connection
+        function startWebSocket(apiUrl, idInstance, apiToken)
+        {
+            const wsUrl = `ws://${baseUrl}/v1/whatsapp/ws/qr-status/${idInstance}/${apiToken}`;
+            const socket = new WebSocket(wsUrl);
+
+            socket.onopen = () => {
+                console.log("WebSocket connection established.");
+            };
+
+            socket.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+
+                // Check the 'status' field, which is sent from the server
+                if (message.status === 'scanned') {
+                    statusMessage.textContent = "QR code scanned successfully!";
+                    statusMessage.className = 'status success';
+
+                    // If 'redirect' field is present, perform the redirection
+                   if (message.redirect) {
+                        let fullRedirectUrl;
+
+                        // Explicitly define the base URL to prevent IDE or environment interference
+                        const baseUrl = "http://127.0.0.1:8000";
+                        console.log("Base URL:", baseUrl);
+                        console.log("Original Redirect URL:", message.redirect);
+
+                        // Check if the redirect URL is relative or absolute
+                        if (!message.redirect.startsWith('http://') && !message.redirect.startsWith('https://')) {
+                            console.log("Redirect URL is relative, prepending base URL...");
+                            fullRedirectUrl = `${baseUrl}${message.redirect}`; // Prepend base URL for relative paths
+                        } else {
+                            console.log("Redirect URL is absolute, using as-is...");
+                            fullRedirectUrl = message.redirect; // Use absolute URL as-is
+                        }
+
+                        console.log("Full Redirect URL:", fullRedirectUrl);
+
+                        window.location.href = fullRedirectUrl; // Redirect to the full URL
+                    } else {
+                        console.log("No redirect URL found in the message.");
+                    }
+
+                    socket.close();
+                } else if (message.status === 'pending') {
+                    statusMessage.textContent = "QR code is not yet scanned.";
+                    statusMessage.className = 'status pending';
+                } else if (message.status === 'unknown') {
+                    statusMessage.textContent = `Current state: ${message.message}`;
+                    statusMessage.className = 'status';
+                }
+                else {
+                    // Optional: If the status is something unexpected, handle it here
+                    statusMessage.textContent = "Unexpected status received.";
+                    statusMessage.className = 'status error';
+                }
+            };
+
+            socket.onerror = (error) => {
+                console.error("WebSocket error:", error);
+                statusMessage.textContent = "Error with WebSocket connection.";
+                statusMessage.className = 'status failure';
+            };
+
+            socket.onclose = () => {
+                console.log("WebSocket connection closed.");
+            };
+        }
+
+
+        // Function to submit task ID
+        function submitTaskId() {
+            const taskId = taskIdInput.value.trim();
+            if (taskId) {
+                checkTaskStatus(taskId);
+            } else {
+                statusMessage.textContent = "Please enter a valid task ID.";
+                statusMessage.className = 'status failure';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,13 +1,17 @@
 from fastapi import FastAPI
 import logging
 
-from src.instagram_api.routes import instagram_api_router
+from src.messengers.instagram_api.routes import instagram_api_router
+from src.messengers.whatsapp_api.routes import whatsapp_api_router
+from src.messengers.telegram_api.routes import telegram_api_router
+
+from src.bots.openai.routes import bot_router
+
 from src.utils.middleware import register_middleware
-from src.whatsapp_api.routes import whatsapp_api_router
-from src.telegram_api.routes import telegram_api_router
-from src.external_service.routes import external_service_api_router
 from src.utils.errors_handler import register_all_errors
+
 from src.utils.logs_handler import setup_logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -37,10 +41,14 @@ def create_application() -> FastAPI:
     setup_logging()
     register_middleware(app)
     register_all_errors(app)
-    app.include_router(external_service_api_router, prefix=f"{version_prefix}/external_service", tags=["External Service"])
     app.include_router(instagram_api_router, prefix=f"{version_prefix}/instagram", tags=["InstagramAPI"])
     app.include_router(telegram_api_router, prefix=f"{version_prefix}/telegram", tags=["TelegramAPI"])
     app.include_router(whatsapp_api_router, prefix=f"{version_prefix}/whatsapp", tags=["WhatsappAPI"])
+    # Вот здесь подключаем ваш bot_router
+    app.include_router(bot_router, prefix=f"{version_prefix}/bot", tags=["Bot"])
+
+
+   # app.include_router(bot_router, prefix....)
 
     return app
 

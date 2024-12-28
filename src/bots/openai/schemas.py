@@ -8,3 +8,7 @@ class UserCreate(BaseModel):
 class TokenUsage(BaseModel):
     username: str
     tokens_used: int
+
+class BotSettings(BaseModel):
+    creativity: float
+    instructions: str

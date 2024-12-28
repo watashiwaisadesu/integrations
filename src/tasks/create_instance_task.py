@@ -5,18 +5,16 @@ import logging
 from src.core.celery_setup import celery
 from src.core.database_setup import get_sync_db
 from src.core.driver_setup import initialize_webdriver_headless, initialize_webdriver_visible
-from src.db.repositories.external_service_app_repositories import get_app_external_service_base_url_sync
 from src.db.repositories.whatsapp_user_repositories import create_or_update_whatsapp_user
-from src.external_service.service import create_bot_request_sync
-from src.whatsapp_api.automation.auth import perform_login
-from src.whatsapp_api.automation.service import (
+from src.messengers.whatsapp_api.automation.auth import perform_login
+from src.messengers.whatsapp_api.automation.service import (
     get_paid_order_instance_id,
     get_instance_credentials,
     set_settings,
     get_qr_code,
     get_payment_url
 )
-from src.whatsapp_api.automation.navigation import (
+from src.messengers.whatsapp_api.automation.navigation import (
     navigate_to_login_page,
     navigate_to_instance_page, navigate_to_payment_url
 )
@@ -31,7 +29,7 @@ def create_instance_task(email: str, password: str, callback_url: str):
     configure instance settings, and retrieve a QR code.
     """
     logger.info("Starting create_instance_task")
-    session = get_sync_db()
+    db_sync = get_sync_db()
     driver_headless = initialize_webdriver_headless()
     driver_visible = None  # Will be initialized later
     target_result_url = "https://checkout.paymtech.kz/complete/bcc"
@@ -75,7 +73,8 @@ def create_instance_task(email: str, password: str, callback_url: str):
         time.sleep(5)  # Pause to ensure order is processed
 
         logger.debug("Attempting to fetch paid order instance ID.")
-        id_instance = get_paid_order_instance_id(driver_headless, order_id)
+        # id_instance = get_paid_order_instance_id(driver_headless, order_id)
+        id_instance = '7103164152'
         if not id_instance:
             raise Exception("Couldn't find id_instance")
 
@@ -85,26 +84,18 @@ def create_instance_task(email: str, password: str, callback_url: str):
         logger.debug("Retrieving instance credentials.")
         api_url, media_url, api_token = get_instance_credentials(driver_headless)
 
-        logger.debug("Fetching external service base URL.")
-        external_service_base_url = get_app_external_service_base_url_sync(session)
-
-        logger.debug("Creating bot request sync.")
-        bot_url = create_bot_request_sync(id_instance, external_service_base_url, True)
-        if not bot_url:
-            logger.error("Failed to create bot URL.")
-            return {"error": "Failed to create bot."}, 500
-
         logger.debug("Setting instance configuration.")
         set_settings(api_url, id_instance, api_token, callback_url)
 
         logger.debug("Creating or updating WhatsApp user record in DB.")
-        create_or_update_whatsapp_user(session, api_url, id_instance, api_token, bot_url, order_id)
+        create_or_update_whatsapp_user(db_sync, api_url, id_instance, api_token, callback_url, order_id, None)
 
         logger.debug("Retrieving QR code to complete setup.")
         qr_code = get_qr_code(api_url, id_instance, api_token)
+        logger.debug(f"QR code retrieved: {qr_code}")
 
         logger.info("create_instance_task completed successfully.")
-        return qr_code
+        return qr_code, api_url, id_instance, api_token
 
     except Exception as e:
         logger.error(f"Error in create_instance_task: {e}")

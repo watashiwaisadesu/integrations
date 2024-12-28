@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, ForeignKey, TIMESTAMP, fun
 from sqlalchemy.orm import relationship
 from src.core.database_setup import Base
 
+
 class InstagramApp(Base):
     __tablename__ = "instagram_app"
 
@@ -14,7 +15,6 @@ class InstagramApp(Base):
     embed_url = Column(String(1000))
 
 
-
 class InstagramUser(Base):
     __tablename__ = "instagram_users"
 
@@ -22,7 +22,7 @@ class InstagramUser(Base):
     user_id = Column(String(255), nullable=False)
     access_token = Column(Text, nullable=False)
     username = Column(String(255), nullable=True)
-    bot_url = Column(String(255), nullable=False)
+    bot_id = Column(String, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now(), nullable=False)
 

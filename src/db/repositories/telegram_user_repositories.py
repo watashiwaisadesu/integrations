@@ -1,5 +1,6 @@
 import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import update, select
 from src.db.models.telegram_models import TelegramUser
 
 async def add_or_update_telegram_user(phone_number: str, db: AsyncSession, **kwargs) -> TelegramUser:
@@ -23,14 +24,31 @@ async def add_or_update_telegram_user(phone_number: str, db: AsyncSession, **kwa
     await db.commit()
     return user
 
+async def get_telegram_user_by_id(db: AsyncSession, user_id: str ):
+    """
+    Fetch the Telegram user by user_id.
+    """
+    query = select(TelegramUser).where(TelegramUser.user_id == str(user_id))
+    result = await db.execute(query)
+    return result.scalar()
+
 async def get_user_by_phone(phone_number: str, db: AsyncSession) -> TelegramUser:
     result = await db.execute(
         sa.select(TelegramUser).where(TelegramUser.phone_number == phone_number)
     )
     return result.scalars().first()
 
-async def get_user_by_username(username: str, db: AsyncSession) -> TelegramUser:
-    result = await db.execute(
-        sa.select(TelegramUser).where(TelegramUser.username == username)
+
+async def update_telegram_bot_id(db: AsyncSession, user_id: str, bot_id: str):
+    """
+    Update the Telegram user with the bot_id.
+    """
+    query = (
+        update(TelegramUser)
+        .where(TelegramUser.user_id == user_id)
+        .values(bot_id=bot_id)
+        .execution_options(synchronize_session="fetch")
     )
-    return result.scalars().first()
+    await db.execute(query)
+    await db.commit()
+    return True

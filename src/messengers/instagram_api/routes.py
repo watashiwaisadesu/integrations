@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Request, Query, Depends
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from celery.result import AsyncResult
 
+from src.bots.openai.service import handle_incoming_message
 from src.tasks.app_setup_task import app_setup_task
 from src.core.celery_setup import celery
 import logging
@@ -14,18 +15,16 @@ from src.db.repositories.instagram_app_repositories import (
 )
 from src.db.repositories.instagram_user_repositories import (
     create_instagram_account,
-    get_instagram_account
+    get_instagram_account_user_by_id
 )
-from src.db.repositories.external_service_app_repositories import get_app_external_service_base_url
-from src.instagram_api.utils import extract_code_from_url
-from src.instagram_api.schemas import (
+from src.messengers.instagram_api.utils import extract_code_from_url
+from src.messengers.instagram_api.schemas import (
     WebhookObject,
     AppSetupRequest,
 )
-from src.instagram_api.token import InstagramAuth
-from src.instagram_api.user import get_instagram_user_info
-from src.instagram_api.service import forward_message_to_service
-from src.external_service.service import create_bot_request
+from src.messengers.instagram_api.token import InstagramAuth
+from src.messengers.instagram_api.user import get_instagram_user_info
+from src.messengers.instagram_api.service import send_instagram_message
 
 # Import your custom exceptions
 from src.utils.errors_handler import (
@@ -56,7 +55,6 @@ async def handle_code(
     try:
         logger.info("Starting handle_code process")
         instagram_app_id, instagram_app_secret = await get_instagram_credentials(db, return_type="credentials")
-        external_service_base_url = await get_app_external_service_base_url(db)
         redirect_uri, code = extract_code_from_url(str(request.url))
         # Initialize the InstagramAuth class
         instagram_auth = InstagramAuth(
@@ -70,17 +68,11 @@ async def handle_code(
         user = get_instagram_user_info(long_lived_token)
         username= user['username']
         user_id = user['user_id']
-        external_service_base_url = await get_app_external_service_base_url(db)
-
         logger.info(f"Instagram user {username} retrieved successfully")
-
-        bot_url = await create_bot_request(username, external_service_base_url, True)
-        if not bot_url:
-            logger.error("Failed to create bot URL.")
-            raise InternalServerError()
-        await create_instagram_account(db, username, user_id, long_lived_token, bot_url)
+        await create_instagram_account(db, username, user_id, long_lived_token, None)
         logger.info("Instagram account created and connected successfully.")
-        return "Your account is now connected to service!"
+        creation_link = f"/v1/bot/bot_creation/instagram/{user_id}"
+        return RedirectResponse(url=creation_link, status_code=302)
     except InternalServerError:
         # Re-raise so our custom handler catches it
         raise
@@ -132,12 +124,12 @@ async def handle_webhook(
 
         for entry in webhook_event.entry:
             page_id = entry.id  # Extract the page_id dynamically
-            page = await get_instagram_account(db, page_id)
+            page = await get_instagram_account_user_by_id(db, page_id)
             if page is None:
                 logger.warning(f"No matching Instagram account for page_id: {page_id}")
                 continue
             page_access_token = page.access_token
-            page_bot_url = page.bot_url
+            assistant_id = page.bot_id
             for messaging_event in entry.messaging:
                 # Skip messages that are echoes
                 if messaging_event.message.get("is_echo"):
@@ -151,12 +143,21 @@ async def handle_webhook(
                     logger.info(
                         f"Forwarding message to external service: {message_text} from {sender_id}"
                     )
-                    await forward_message_to_service(
-                        bot_url=page_bot_url,
-                        page_access_token=page_access_token,
-                        page_id=page_id,
+                    # Process the incoming message
+                    response = await handle_incoming_message(
+                        db=db,
                         sender_id=sender_id,
-                        message_text=message_text,
+                        owner_id=page_id,
+                        assistant_id=assistant_id,
+                        message=message_text,
+                        platform="instagram",
+                    )
+                    logger.info(f"Response for sender {sender_id}: {response['response']}")
+                    await send_instagram_message(
+                        page_token=page_access_token,
+                        page_id=page_id,
+                        recipient_id=sender_id,
+                        message=response['response']
                     )
         return {"status": "success"}
     except InvalidWebhookPayload:
